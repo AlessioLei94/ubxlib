@@ -97,6 +97,24 @@ static const int8_t gCellRatToModuleRatR4R5[] = {
         8   // U_CELL_NET_RAT_NB1
     };
 
+/** Table to convert uCellNetRat_t to the value used in
+ * CONFIGURING the module, LARA-R6001 form.
+ */
+static const int8_t gCellRatToModuleRatR6001[] = {
+    -1, // Dummy value for U_CELL_NET_RAT_UNKNOWN_OR_NOT_USED
+        0,  // U_CELL_NET_RAT_GSM_GPRS_EGPRS: 2G
+        -1, // U_CELL_NET_RAT_GSM_COMPACT
+        2,  // U_CELL_NET_RAT_UTRAN: 3G
+        -1, // U_CELL_NET_RAT_EGPRS
+        -1, // U_CELL_NET_RAT_HSDPA
+        -1, // U_CELL_NET_RAT_HSUPA
+        -1, // U_CELL_NET_RAT_HSDPA_HSUPA
+        3,  // U_CELL_NET_RAT_LTE
+        -1, // U_CELL_NET_RAT_EC_GSM
+        -1, // U_CELL_NET_RAT_CATM1
+        -1  // U_CELL_NET_RAT_NB1
+    };
+
 /* ----------------------------------------------------------------
  * STATIC FUNCTIONS: SARA-U2 RAT SETTING/GETTING BEHAVIOUR
  * -------------------------------------------------------------- */
@@ -108,6 +126,8 @@ int8_t cellRatToModuleRat(uCellModuleType_t moduleType, uCellNetRat_t rat)
 
     if (moduleType == U_CELL_MODULE_TYPE_SARA_U201) {
         moduleRat = gCellRatToModuleRatU201[(int32_t) rat];
+    } else if (moduleType == U_CELL_MODULE_TYPE_LARA_R6001) {
+        moduleRat = gCellRatToModuleRatR6001[(int32_t) rat];
     } else {
         moduleRat = gCellRatToModuleRatR4R5[(int32_t) rat];
     }
