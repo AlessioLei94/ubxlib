@@ -243,6 +243,38 @@ const uCellPrivateModule_t gUCellPrivateModuleList[] = {
          (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_EDRX)                                  |
          (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_MQTTSN) /* features */
         )
+    },
+    {
+        U_CELL_MODULE_TYPE_LARA_R6001, 150 /* Pwr On pull ms */, 1500 /* Pwr off pull ms */,
+        6 /* Boot wait */, 10 /* Min awake */, 20 /* Pwr down wait */, 15 /* Reboot wait */, 10 /* AT timeout */,
+        20 /* Cmd wait ms */, 3000 /* Resp max wait ms */, 4 /* radioOffCfun */, 150 /* resetHoldMilliseconds */,
+        1 /* Simultaneous RATs */,
+        (1UL << (int32_t) U_CELL_NET_RAT_CATM1) /* RATs */,
+        ((1UL << (int32_t) U_CELL_PRIVATE_FEATURE_MNO_PROFILE)                         |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_CSCON)                               |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_ROOT_OF_TRUST)                       |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_SECURITY_C2C)                        |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_DATA_COUNTERS)                       |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_SECURITY_TLS_IANA_NUMBERING)         |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_SECURITY_TLS_CIPHER_LIST)            |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_SECURITY_TLS_SERVER_NAME_INDICATION) |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_MQTT)                                |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_MQTT_BINARY_PUBLISH)                 |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_MQTT_WILL)                           |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_MQTT_KEEP_ALIVE)                     |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_MQTT_SECURITY)                       |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_CONTEXT_MAPPING_REQUIRED)            |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_AUTO_BAUDING)                        |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_AT_PROFILES)                         |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_SECURITY_ZTP)                        |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_FILE_SYSTEM_TAG)                     |
+        //  (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_DTR_POWER_SAVING)                    |
+        //  (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_DEEP_SLEEP_URC)                      |
+        //  (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_3GPP_POWER_SAVING)                   |
+        //  (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_3GPP_POWER_SAVING_PAGING_WINDOW_SET) |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_EDRX)                                |
+         (1UL << (int32_t) U_CELL_PRIVATE_FEATURE_MQTTSN) /* features */
+        )
     }
 };
 
@@ -285,6 +317,22 @@ static const uCellNetRat_t gModuleRatToCellRatR4R5[] = {
     U_CELL_NET_RAT_UNKNOWN_OR_NOT_USED, // 4: UTRAN with HSDPA
     U_CELL_NET_RAT_UNKNOWN_OR_NOT_USED, // 5: UTRAN with HSUPA
     U_CELL_NET_RAT_UNKNOWN_OR_NOT_USED, // 6: UTRAN with HSDPA and HSUPA
+    U_CELL_NET_RAT_CATM1,               // 7: LTE cat-M1
+    U_CELL_NET_RAT_NB1,                 // 8: LTE NB1
+    U_CELL_NET_RAT_GSM_GPRS_EGPRS       // 9: 2G again
+};
+
+/** Table to convert the RAT values used in the
+ * module to uCellNetRat_t, R6001 version.
+ */
+static const uCellNetRat_t gModuleRatToCellRatR6001[] = {
+    U_CELL_NET_RAT_GSM_GPRS_EGPRS,      // 0: 2G
+    U_CELL_NET_RAT_UNKNOWN_OR_NOT_USED, // 1: NOT USED
+    U_CELL_NET_RAT_UTRAN,               // 2: UTMS
+    U_CELL_NET_RAT_LTE,                 // 3: UTRAN/LTE
+    U_CELL_NET_RAT_UNKNOWN_OR_NOT_USED, // 4: NOT USED
+    U_CELL_NET_RAT_UNKNOWN_OR_NOT_USED, // 5: NOT USED
+    U_CELL_NET_RAT_UNKNOWN_OR_NOT_USED, // 6: NOT USED
     U_CELL_NET_RAT_CATM1,               // 7: LTE cat-M1
     U_CELL_NET_RAT_NB1,                 // 8: LTE NB1
     U_CELL_NET_RAT_GSM_GPRS_EGPRS       // 9: 2G again
@@ -563,6 +611,10 @@ uCellNetRat_t uCellPrivateModuleRatToCellRat(uCellModuleType_t moduleType,
         if (moduleType == U_CELL_MODULE_TYPE_SARA_U201) {
             if (moduleRat < (int32_t) (sizeof(gModuleRatToCellRatU201) / sizeof(gModuleRatToCellRatU201[0]))) {
                 cellRat = gModuleRatToCellRatU201[moduleRat];
+            }
+        } else if (moduleType == U_CELL_MODULE_TYPE_LARA_R6001) {
+            if (moduleRat < (int32_t) (sizeof(gModuleRatToCellRatR6001) / sizeof(gModuleRatToCellRatR6001[0]))) {
+                cellRat = gModuleRatToCellRatR6001[moduleRat];
             }
         } else {
             if (moduleRat < (int32_t) (sizeof(gModuleRatToCellRatR4R5) / sizeof(gModuleRatToCellRatR4R5[0]))) {
