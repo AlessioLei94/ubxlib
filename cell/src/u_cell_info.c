@@ -335,6 +335,29 @@ static int32_t getRadioParamsUcged2LaraR6001(uAtClientHandle_t atHandle,
     return uAtClientUnlock(atHandle);
 }
 
+// Fill in the radio parameters the AT+CREG=2 way, LARA-R6001 flavour
+// Used mainly to get the cellID, not returned by the AT+UCGED=2 way
+static int32_t getRadioParamsCreg2LaraR6001(uAtClientHandle_t atHandle,
+                                            uCellPrivateRadioParameters_t *pRadioParameters)
+{
+    // AT+CREG?
+    // <n>,<stat>[,<lac>,<ci>[,<AcTStatus>]]
+    uAtClientLock(atHandle);
+    uAtClientCommandStart(atHandle, "AT+CREG?");
+    uAtClientCommandStop(atHandle);
+    // Read response
+    uAtClientResponseStart(atHandle, "+CREG:");
+    // Skip <n>,<stat>
+    uAtClientSkipParameters(atHandle, 2);
+    // Read <lac>
+    pRadioParameters->tac = uAtClientReadIntHex(atHandle);
+    // Read <ci>
+    pRadioParameters->cellId = uAtClientReadIntHex(atHandle);
+    uAtClientResponseStop(atHandle);
+
+    return uAtClientUnlock(atHandle);
+}
+
 // Turn a string such as "-104.20", i.e. a signed
 // decimal floating point number, into an int32_t.
 static int32_t strToInt32(const char *pString)
@@ -440,6 +463,7 @@ int32_t uCellInfoRefreshRadioParameters(uDeviceHandle_t cellHandle)
                             break;
                         case U_CELL_MODULE_TYPE_LARA_R6001:
                             errorCode = getRadioParamsUcged2LaraR6001(atHandle, pRadioParameters);
+                            errorCode = getRadioParamsCreg2LaraR6001(atHandle, pRadioParameters);
                         default:
                             break;
                     }
