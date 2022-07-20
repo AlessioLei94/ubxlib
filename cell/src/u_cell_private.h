@@ -281,6 +281,7 @@ typedef struct {
     int32_t rsrqDb;   /**< The RSRQ of the serving cell. */
     int32_t rxQual;   /**< The RxQual of the serving cell. */
     int32_t cellId;   /**< The cell ID of the serving cell. */
+    int32_t pCellId;  /**< The physical cell ID of the serving cell. */
     int32_t earfcn;   /**< The EARFCN of the serving cell. */
     int32_t tac;      /**, The TAC of the serving cell. */
 } uCellPrivateRadioParameters_t;
