@@ -931,9 +931,11 @@ static int32_t moduleConfigure(uCellPrivateInstance_t *pInstance,
     }
 
     if (success &&
-        U_CELL_PRIVATE_MODULE_IS_SARA_R4(pInstance->pModule->moduleType)) {
+        (U_CELL_PRIVATE_MODULE_IS_SARA_R4(pInstance->pModule->moduleType) ||
+        pInstance->pModule->moduleType == U_CELL_MODULE_TYPE_LARA_R6001)) {
         // SARA-R4 only: switch on the right UCGED mode
         // (SARA-R5 and SARA-U201 have a single mode and require no setting)
+        // LARA-R6001 only works with UCGED=2
         if (U_CELL_PRIVATE_HAS(pInstance->pModule, U_CELL_PRIVATE_FEATURE_UCGED5)) {
             success = moduleConfigureOne(atHandle, "AT+UCGED=5",
                                          U_CELL_PWR_CONFIGURATION_COMMAND_TRIES);
