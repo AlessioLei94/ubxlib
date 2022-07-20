@@ -816,11 +816,30 @@ int32_t uAtClientResponseStart(uAtClientHandle_t atHandle,
  * should be performed, e.g. by calling uAtClientErrorGet(),
  * before the return value is considered valid.
  *
+ * This API assumes the integer to be extracted from the
+ * string is expressed in decimal form.
+ *
  * @param atHandle the handle of the AT client.
  * @return         the positive integer or negative error
  *                 code.
  */
 int32_t uAtClientReadInt(uAtClientHandle_t atHandle);
+
+/** Read an integer parameter from the received AT response.
+ * Both negative and positive integers are supported however
+ * a negative return value is also used to indicate an error.
+ * If a negative integer is possible then a check for errors
+ * should be performed, e.g. by calling uAtClientErrorGet(),
+ * before the return value is considered valid.
+ *
+ * This API assumes the integer to be extracted from the
+ * string is expressed in hexadecimal form.
+ *
+ * @param atHandle the handle of the AT client.
+ * @return         the positive integer or negative error
+ *                 code.
+ */
+int32_t uAtClientReadIntHex(uAtClientHandle_t atHandle);
 
 /** Read a 64-bit unsigned integer parameter from the
  * received AT response.

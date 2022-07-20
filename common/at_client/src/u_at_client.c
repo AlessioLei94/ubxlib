@@ -1804,6 +1804,23 @@ static int32_t readInt(uAtClientInstance_t *pClient)
     return integerRead;
 }
 
+// Read an integer.
+// The mutex should be locked before this is called.
+static int32_t readHex(uAtClientInstance_t *pClient)
+{
+    char buffer[32]; // Enough for an integer
+    int32_t integerRead = -1;
+
+    if ((pClient->error == U_ERROR_COMMON_SUCCESS) &&
+        !pClient->stopTag.found &&
+        (readString(pClient, buffer,
+                    sizeof(buffer), false) > 0)) {
+        integerRead = strtol(buffer, NULL, 16);
+    }
+
+    return integerRead;
+}
+
 // Record an error sent from the AT server, i.e. ERROR
 // or CMS ERROR or CME ERROR.
 static void setDeviceError(uAtClientInstance_t *pClient,
@@ -3089,7 +3106,7 @@ int32_t uAtClientResponseStart(uAtClientHandle_t atHandle,
     return returnCode;
 }
 
-// Read an integer parameter.
+// Read a decimal integer parameter.
 int32_t uAtClientReadInt(uAtClientHandle_t atHandle)
 {
     uAtClientInstance_t *pClient = (uAtClientInstance_t *) atHandle;
@@ -3103,6 +3120,22 @@ int32_t uAtClientReadInt(uAtClientHandle_t atHandle)
 
     return integerRead;
 }
+
+// Read an hexadecimal integer parameter.
+int32_t uAtClientReadIntHex(uAtClientHandle_t atHandle)
+{
+    uAtClientInstance_t *pClient = (uAtClientInstance_t *) atHandle;
+    int32_t integerRead;
+
+    U_AT_CLIENT_LOCK_CLIENT_MUTEX(pClient);
+
+    integerRead = readHex(pClient);
+
+    U_AT_CLIENT_UNLOCK_CLIENT_MUTEX(pClient);
+
+    return integerRead;
+}
+
 
 // Read a uint64_t parameter.
 int32_t uAtClientReadUint64(uAtClientHandle_t atHandle,
