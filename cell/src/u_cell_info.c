@@ -272,6 +272,69 @@ static int32_t getRadioParamsUcged2SaraR422(uAtClientHandle_t atHandle,
     return uAtClientUnlock(atHandle);
 }
 
+// Fill in the radio parameters the AT+UCGED=2 way, LARA-R6001 flavour
+static int32_t getRadioParamsUcged2LaraR6001(uAtClientHandle_t atHandle,
+                                            uCellPrivateRadioParameters_t *pRadioParameters)
+{
+    int32_t x;
+    int32_t y;
+    int32_t rat;
+
+    uAtClientLock(atHandle);
+    uAtClientCommandStart(atHandle, "AT+UCGED?");
+    uAtClientCommandStop(atHandle);
+    // The line with just "+UCGED: 2" on it
+    uAtClientResponseStart(atHandle, "+UCGED:");
+    uAtClientSkipParameters(atHandle, 1);
+    // We want to read the RAT to know what to expect next
+    uAtClientResponseStart(atHandle, NULL);
+    rat = uAtClientReadInt(atHandle);
+    // Response changes based on RAT
+    if(rat == 4) {
+        // LTE
+        // +UCGED: 2
+        // <rat>,<svc>,<MCC>,<MNC>
+        // <EARFCN>,<Lband>,<ul_BW>,<dl_BW>,<TAC>,<LcellId>,<P-CID>,<mTmsi>,<mmeGrId>,<mmeCode>,<RSRP_value>,<RSRQ_value>,<Lsinr>,<LTE_rrc>,<RI>,<CQI>,<avg_rsrp>,
+        // <totalPuschPwr>,<avgPucchPwr>,<drx>, <l2w>,<volte_mode>[,<meas_gap>,<tti_bundling>]
+        // e.g.
+        // 4,0,001,01
+        // 2525,5,25,50,2b67,69f6bc7,111,00000000,ffff,ff,67,19,0.00,255,255,255,67,
+        // 11,255,0,255,255,0,0
+
+        // Skip <svc>,<MCC>,<MNC>
+        uAtClientSkipParameters(atHandle, 3);
+        // Now the line of interest
+        uAtClientResponseStart(atHandle, NULL);
+        // EARFCN is the first integer
+        pRadioParameters->earfcn = uAtClientReadInt(atHandle);
+        // Skip <Lband>,<ul_BW>,<dl_BW>,
+        uAtClientSkipParameters(atHandle, 3);
+        // Read <TAC>
+        pRadioParameters->tac = uAtClientReadIntHex(atHandle);
+        // skip <LcellId>
+        pRadioParameters->cellId = uAtClientReadInt(atHandle);
+        // Read <P-CID>
+        pRadioParameters->pCellId = uAtClientReadInt(atHandle);
+        // Skip <mTmsi>,<mmeGrId>,<mmeCode>
+        uAtClientSkipParameters(atHandle, 3);
+        // Read RSRP, as a plain-old dBm value
+        x = uAtClientReadInt(atHandle);
+        // Read RSRQ, as a plain-old dB value.
+        y = uAtClientReadInt(atHandle);
+        if (uAtClientErrorGet(atHandle) == 0) {
+            // Note that these last two are usually negative
+            // integers, hence we check for errors here so as
+            // not to mix up what might be a negative error
+            // code with a negative return value.
+            pRadioParameters->rsrpDbm = x;
+            pRadioParameters->rsrqDb = y;
+        }
+    }
+    uAtClientResponseStop(atHandle);
+
+    return uAtClientUnlock(atHandle);
+}
+
 // Turn a string such as "-104.20", i.e. a signed
 // decimal floating point number, into an int32_t.
 static int32_t strToInt32(const char *pString)
@@ -375,6 +438,8 @@ int32_t uCellInfoRefreshRadioParameters(uDeviceHandle_t cellHandle)
                         case U_CELL_MODULE_TYPE_SARA_R422:
                             errorCode = getRadioParamsUcged2SaraR422(atHandle, pRadioParameters);
                             break;
+                        case U_CELL_MODULE_TYPE_LARA_R6001:
+                            errorCode = getRadioParamsUcged2LaraR6001(atHandle, pRadioParameters);
                         default:
                             break;
                     }
@@ -388,7 +453,9 @@ int32_t uCellInfoRefreshRadioParameters(uDeviceHandle_t cellHandle)
                 uPortLog("             RSRQ:    %d dB\n", pRadioParameters->rsrqDb);
                 uPortLog("             RxQual:  %d\n", pRadioParameters->rxQual);
                 uPortLog("             cell ID: %d\n", pRadioParameters->cellId);
+                uPortLog("             pCell ID: %d\n", pRadioParameters->pCellId);
                 uPortLog("             EARFCN:  %d\n", pRadioParameters->earfcn);
+                uPortLog("             TAC:     %x\n", pRadioParameters->tac);
             } else {
                 uPortLog("U_CELL_INFO: unable to refresh radio parameters.\n");
             }
