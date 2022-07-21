@@ -181,6 +181,18 @@ int32_t uCellCfgSetRatRank(uDeviceHandle_t cellHandle,
 uCellNetRat_t uCellCfgGetRat(uDeviceHandle_t cellHandle,
                              int32_t rank);
 
+/** Get the radio access technology value converted to module
+ * values (URAT values)
+ *
+ * @param cellHandle  the handle of the cellular instance.
+ * @param rank        the rank to check, where 0 is the highest
+ *                    and the lowest is implementation dependent.
+ * @return            the radio access technology at specified rank
+ *                    converted from uCellNetRat_t value to URAT value
+ */
+int32_t uCellCfgGetUrat(uDeviceHandle_t cellHandle,
+                        uCellNetRat_t rat);
+
 /** Get the rank at which the given radio access technology
  * is being used by the cellular module.
  *

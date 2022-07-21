@@ -1052,6 +1052,36 @@ uCellNetRat_t uCellCfgGetRat(uDeviceHandle_t cellHandle,
     return (uCellNetRat_t) errorCodeOrRat;
 }
 
+// Get the radio access technology that is being used by
+// the cellular module in module terms (URAT value)
+int32_t uCellCfgGetUrat(uDeviceHandle_t cellHandle,
+                        int32_t rank)
+{
+    uCellPrivateInstance_t *pInstance;
+    uCellNetRat_t errorCodeOrRat = uCellCfgGetRat(cellHandle, rank);
+
+    if (errorCodeOrRat >= 0) {
+        // No need to check gUCellPrivateMutex != NULL
+        // if NULL uCellCfgGetRat would return an error code
+        U_PORT_MUTEX_LOCK(gUCellPrivateMutex);
+
+        pInstance = pUCellPrivateGetInstance(cellHandle);
+
+        // Get the URAT specific to the module type
+        if (pInstance->pModule->moduleType == U_CELL_MODULE_TYPE_SARA_U201) {
+            errorCodeOrRat = gCellRatToModuleRatU201[(int32_t) errorCodeOrRat];
+        } else if (pInstance->pModule->moduleType == U_CELL_MODULE_TYPE_LARA_R6001) {
+            errorCodeOrRat = gCellRatToModuleRatR6001[(int32_t) errorCodeOrRat];
+        } else {
+            errorCodeOrRat = gCellRatToModuleRatR4R5[(int32_t) errorCodeOrRat];
+        }
+
+        U_PORT_MUTEX_UNLOCK(gUCellPrivateMutex);
+    }
+
+    return (uCellNetRat_t) errorCodeOrRat;
+}
+
 // Get the rank at which the given radio access technology
 // is being used by the cellular module.
 int32_t uCellCfgGetRatRank(uDeviceHandle_t cellHandle,
