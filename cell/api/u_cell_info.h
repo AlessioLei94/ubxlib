@@ -158,6 +158,15 @@ int32_t uCellInfoGetSnrDb(uDeviceHandle_t cellHandle,
  */
 int32_t uCellInfoGetCellId(uDeviceHandle_t cellHandle);
 
+/** Get the physical cell ID that pertained after the last
+ * call to uCellInfoRefreshRadioParameters().
+ *
+ * @param cellHandle  the handle of the cellular instance.
+ * @return            the cell ID, or negative error code on
+ *                    failure.
+ */
+int32_t uCellInfoGetPhysicalCellID(uDeviceHandle_t cellHandle);
+
 /** Get the EARFCN that pertained after the last call to
  * uCellInfoRefreshRadioParameters().
  *
@@ -166,6 +175,15 @@ int32_t uCellInfoGetCellId(uDeviceHandle_t cellHandle);
  *                    registered with the cellular network.
  */
 int32_t uCellInfoGetEarfcn(uDeviceHandle_t cellHandle);
+
+/** Get the TAC that pertained after the last call to
+ * uCellInfoRefreshRadioParameters().
+ *
+ * @param cellHandle  the handle of the cellular instance.
+ * @return            the TAC, or -1 if the module is not
+ *                    registered with the cellular network.
+ */
+int32_t uCellInfoGetTAC(uDeviceHandle_t cellHandle);
 
 /** Get the IMEI of the cellular module.
  *

@@ -691,6 +691,28 @@ int32_t uCellInfoGetCellId(uDeviceHandle_t cellHandle)
     return errorCodeOrValue;
 }
 
+// Get the physical cell ID.
+int32_t uCellInfoGetPhysicalCellID(uDeviceHandle_t cellHandle)
+{
+    int32_t errorCodeOrValue = (int32_t) U_ERROR_COMMON_NOT_INITIALISED;
+    uCellPrivateInstance_t *pInstance;
+
+    if (gUCellPrivateMutex != NULL) {
+
+        U_PORT_MUTEX_LOCK(gUCellPrivateMutex);
+
+        pInstance = pUCellPrivateGetInstance(cellHandle);
+        errorCodeOrValue = (int32_t) U_ERROR_COMMON_INVALID_PARAMETER;
+        if (pInstance != NULL) {
+            errorCodeOrValue = pInstance->radioParameters.pCellId;
+        }
+
+        U_PORT_MUTEX_UNLOCK(gUCellPrivateMutex);
+    }
+
+    return errorCodeOrValue;
+}
+
 // Get the EARFCN.
 int32_t uCellInfoGetEarfcn(uDeviceHandle_t cellHandle)
 {
@@ -705,6 +727,28 @@ int32_t uCellInfoGetEarfcn(uDeviceHandle_t cellHandle)
         errorCodeOrValue = (int32_t) U_ERROR_COMMON_INVALID_PARAMETER;
         if (pInstance != NULL) {
             errorCodeOrValue = pInstance->radioParameters.earfcn;
+        }
+
+        U_PORT_MUTEX_UNLOCK(gUCellPrivateMutex);
+    }
+
+    return errorCodeOrValue;
+}
+
+// Get the TAC.
+int32_t uCellInfoGetTAC(uDeviceHandle_t cellHandle)
+{
+    int32_t errorCodeOrValue = (int32_t) U_ERROR_COMMON_NOT_INITIALISED;
+    uCellPrivateInstance_t *pInstance;
+
+    if (gUCellPrivateMutex != NULL) {
+
+        U_PORT_MUTEX_LOCK(gUCellPrivateMutex);
+
+        pInstance = pUCellPrivateGetInstance(cellHandle);
+        errorCodeOrValue = (int32_t) U_ERROR_COMMON_INVALID_PARAMETER;
+        if (pInstance != NULL) {
+            errorCodeOrValue = pInstance->radioParameters.tac;
         }
 
         U_PORT_MUTEX_UNLOCK(gUCellPrivateMutex);
